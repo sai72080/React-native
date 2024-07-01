@@ -14,11 +14,13 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../context/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { login } = useAuth();
 
   const handleLogIn = () => {
     if (!username.trim() || !password.trim()) {
@@ -31,28 +33,14 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
-    // Your login logic here
-    console.log("Username:", username);
-    console.log("Password:", password);
-    // Example: Perform API call for login, etc.
+    const user = { name: username, email: `${username}@example.com` }; // Replace with actual user data
+    login(user);
 
-    // Reset fields and error state after successful login
     setUsername("");
     setPassword("");
     setError("");
 
-    // Display an alert or navigate to another screen
-    showAlert("Success", "Login Successful");
-  };
-
-  const showAlert = (title, message) => {
-    if (Platform.OS === "web") {
-      // Custom alert for web
-      alert(`${title}\n\n${message}`);
-    } else {
-      // Use Alert.alert for Android and iOS
-      Alert.alert(title, message, [{ text: "OK" }]);
-    }
+    navigation.navigate("Account");
   };
 
   return (
@@ -132,7 +120,7 @@ const LoginScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.createAccountContainer}
-            onPress={() => navigation.navigate("Signup")}
+            onPress={() => navigation.navigate("SignUp")}
           >
             <Text style={styles.createAccountText}>
               Don't have an account?{" "}
@@ -166,7 +154,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 15,
-    marginLeft: 600,
   },
   logo: {
     width: 120,
@@ -214,42 +201,40 @@ const styles = StyleSheet.create({
   },
   forgotPasswordContainer: {
     alignSelf: "flex-end",
-    width: "90%",
-    marginTop: 10,
+    marginBottom: 20,
   },
   forgotPasswordText: {
-    color: "#F97794",
-    fontSize: 15,
-    textDecorationLine: "underline",
-    fontWeight: "bold",
+    fontSize: 14,
+    color: "#623AA2",
   },
   signInButton: {
-    marginTop: 20,
+    width: "100%",
+    height: 50,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  linearGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    flexDirection: "row",
   },
   signInButtonText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     marginRight: 10,
   },
-  linearGradient: {
+  createAccountContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  createAccountContainer: {
-    marginTop: 20,
   },
   createAccountText: {
     fontSize: 16,
     color: "#262626",
-    textAlign: "center",
   },
   createText: {
-    textDecorationLine: "underline",
     color: "#F97794",
     fontWeight: "bold",
   },

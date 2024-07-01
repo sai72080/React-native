@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Image,
   ImageBackground,
   StyleSheet,
   Text,
@@ -12,52 +13,41 @@ import {
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import Entypo from "react-native-vector-icons/Entypo";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../context/AuthContext";
 
 const SignupScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const { login } = useAuth();
 
-  const handleRegister = () => {
-    // Validation: Check if any field is empty
-    if (!username.trim() || !mobile.trim() || !email.trim() || !password.trim()) {
-      setError("All fields are required");
+  const handleSignUp = () => {
+    if (!username.trim() || !password.trim()) {
+      setError("Username and Password are required");
       return;
     }
 
-    // Validation: Check if password length is less than 6 characters
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
 
-    // Your registration logic here
-    console.log("Username:", username);
-    console.log("Mobile:", mobile);
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // Example: Perform API call for registration, etc.
-
-    // Reset fields and error state after successful registration
-    setUsername("");
-    setMobile("");
-    setEmail("");
-    setPassword("");
-    setError("");
-
-    // Display an alert or navigate to another screen
-    if (Platform.OS === "web") {
-      alert("Registration Successful");
-    } else {
-      Alert.alert("Success", "Registration Successful", [{ text: "OK" }]);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
 
-    // Navigate to LoginScreen after successful registration
-    navigation.navigate("Login");
+    const user = { name: username, email: `${username}@example.com` }; // Replace with actual user data
+    login(user);
+
+    setUsername("");
+    setPassword("");
+    setConfirmPassword("");
+    setError("");
+
+    navigation.navigate("Account");
   };
 
   return (
@@ -70,7 +60,14 @@ const SignupScreen = ({ navigation }) => {
         style={styles.background}
       >
         <View style={styles.formContainer}>
-          <Text style={styles.createAccountText}>Create Account</Text>
+          <Image
+            source={{
+              uri: "https://marketplace.canva.com/EAFvDRwEHHg/1/0/1600w/canva-colorful-abstract-online-shop-free-logo-cpI8ixEpis8.jpg",
+            }}
+            style={styles.logo}
+          />
+          <Text style={styles.helloText}>Hello</Text>
+          <Text style={styles.signInText}>Create a new account</Text>
 
           <View style={styles.inputContainer}>
             <FontAwesome
@@ -89,35 +86,19 @@ const SignupScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.inputContainer}>
-            <AntDesign
-              name="mobile1"
-              size={24}
-              color="#9A9A9A"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              keyboardType="numeric"
-              style={styles.textInput}
-              placeholder="Mobile"
-              placeholderTextColor="#9A9A9A"
-              value={mobile}
-              onChangeText={(text) => setMobile(text)}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <AntDesign
-              name="mail"
+            <Fontisto
+              name="locked"
               size={24}
               color="#9A9A9A"
               style={styles.inputIcon}
             />
             <TextInput
               style={styles.textInput}
-              placeholder="Email"
+              placeholder="Password"
               placeholderTextColor="#9A9A9A"
-              value={email}
-              onChangeText={(text) => setEmail(text)}
+              secureTextEntry={true}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
             />
           </View>
 
@@ -130,11 +111,11 @@ const SignupScreen = ({ navigation }) => {
             />
             <TextInput
               style={styles.textInput}
-              placeholder="Password"
-              secureTextEntry={true}
+              placeholder="Confirm Password"
               placeholderTextColor="#9A9A9A"
-              value={password}
-              onChangeText={(text) => setPassword(text)}
+              secureTextEntry={true}
+              value={confirmPassword}
+              onChangeText={(text) => setConfirmPassword(text)}
             />
           </View>
 
@@ -142,46 +123,24 @@ const SignupScreen = ({ navigation }) => {
             <Text style={styles.errorText}>{error}</Text>
           ) : null}
 
-          <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={handleRegister}
-          >
+          <TouchableOpacity style={styles.signInButton} onPress={handleSignUp}>
             <LinearGradient
               colors={["#F97794", "#623AA2"]}
               style={styles.linearGradient}
             >
-              <Text style={styles.signUpButtonText}>Register</Text>
+              <Text style={styles.signInButtonText}>Sign Up</Text>
               <AntDesign name="arrowright" size={24} color="white" />
             </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.socialMediaContainer}
-            onPress={() => console.log("Social media signup pressed")}
+            style={styles.createAccountContainer}
+            onPress={() => navigation.navigate("Login")}
           >
-            <Text style={styles.footerText}>
-              Or create using social media
+            <Text style={styles.createAccountText}>
+              Already have an account?{" "}
+              <Text style={styles.createText}>Sign In</Text>
             </Text>
-            <View style={styles.socialIconsContainer}>
-              <Entypo
-                name="facebook-with-circle"
-                size={30}
-                color="#3b5998"
-                style={styles.socialIcon}
-              />
-              <Entypo
-                name="twitter-with-circle"
-                size={30}
-                color="#1DA1F2"
-                style={styles.socialIcon}
-              />
-              <AntDesign
-                name="google"
-                size={30}
-                color="#DB4437"
-                style={styles.socialIcon}
-              />
-            </View>
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -192,7 +151,6 @@ const SignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
   },
   background: {
     flex: 1,
@@ -211,19 +169,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 15,
-    marginLeft: 600,
   },
-  createAccountText: {
-    textAlign: "center",
-    fontSize: 30,
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+    borderRadius: 50,
+  },
+  helloText: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#262626",
+    marginBottom: 10,
+  },
+  signInText: {
+    fontSize: 18,
     color: "#262626",
     marginBottom: 20,
-    fontWeight: "bold",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ccc",
@@ -243,47 +210,40 @@ const styles = StyleSheet.create({
     borderWidth: 0, 
     appearance: "none", 
   },
-  signUpButton: {
-    width: "100%",
-    marginTop: 20,
-  },
-  signUpButtonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  linearGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  footerText: {
-    color: "#262626",
-    textAlign: "center",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  socialMediaContainer: {
-    alignItems: "center",
-    marginTop: 20,
-  },
-  socialIconsContainer: {
-    flexDirection: "row",
-    marginTop: 10,
-  },
-  socialIcon: {
-    marginHorizontal: 10,
-    padding: 8,
-    borderRadius: 50,
-  },
   errorText: {
     color: "red",
     marginBottom: 10,
-    textAlign: "center",
+  },
+  signInButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  linearGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    flexDirection: "row",
+  },
+  signInButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
+  createAccountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  createAccountText: {
+    fontSize: 16,
+    color: "#262626",
+  },
+  createText: {
+    color: "#F97794",
+    fontWeight: "bold",
   },
 });
 

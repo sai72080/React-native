@@ -1,5 +1,3 @@
-// ButtonsScreen.js
-
 import React from "react";
 import { StyleSheet, View, StatusBar, SafeAreaView } from "react-native";
 import ButtonComponent from "../components/ButtonComponent";
@@ -8,7 +6,6 @@ import { Buttons } from "../components/Buttons";
 
 const ButtonScreen = ({ navigation }) => {
   const handlePress = (buttonTitle) => {
-    // Example alert message for button press
     console.log(`Pressed ${buttonTitle}`);
   };
 
