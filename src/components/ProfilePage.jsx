@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import Header from "../components/Header";
-import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfilePage = () => {
   const navigation = useNavigation();
@@ -16,85 +15,116 @@ const ProfilePage = () => {
   const [language, setLanguage] = useState(user?.language || 'english');
   const [bankAccount, setBankAccount] = useState(user?.bankAccount || '');
   const [cardDetails, setCardDetails] = useState(user?.cardDetails || '');
+  const [isEditing, setIsEditing] = useState(true);
 
-  const handleSave = () => {
-    
-    console.log('Profile updated:', {
-      profilePicture, name, contactNumber, email, language, bankAccount, cardDetails
-    });
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        const profileData = await AsyncStorage.getItem('profileData');
+        if (profileData) {
+          const { profilePicture, name, contactNumber, email, language, bankAccount, cardDetails } = JSON.parse(profileData);
+          setProfilePicture(profilePicture);
+          setName(name);
+          setContactNumber(contactNumber);
+          setEmail(email);
+          setLanguage(language);
+          setBankAccount(bankAccount);
+          setCardDetails(cardDetails);
+          setIsEditing(false);
+        }
+      } catch (error) {
+        console.error('Failed to load profile data:', error);
+      }
+    };
+
+    loadProfileData();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const profileData = { profilePicture, name, contactNumber, email, language, bankAccount, cardDetails };
+      await AsyncStorage.setItem('profileData', JSON.stringify(profileData));
+      console.log('Profile updated:', profileData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save profile data:', error);
+    }
   };
 
-  const handleLogout = () => {
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('profileData');
+    } catch (error) {
+      console.error('Failed to remove profile data:', error);
+    }
     logout();
     navigation.navigate("Home");
   };
 
   return (
     <View style={styles.container}>
-      {/* <Header /> */}
       <View style={styles.contentContainer}>
         {user ? (
           <>
-            <View style={styles.userInfoContainer}>
-              {/* <TouchableOpacity onPress={() => {}}>
-                <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-              </TouchableOpacity> */}
-              <TextInput
-                style={styles.input}
-                placeholder="Name"
-                value={name}
-                onChangeText={setName}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Contact Number"
-                value={contactNumber}
-                onChangeText={setContactNumber}
-                keyboardType="phone-pad"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-              />
-              {/* <View style={styles.pickerContainer}>
-                <Text style={styles.pickerLabel}>Selected Language</Text>
-                <Picker
-                  selectedValue={language}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => setLanguage(itemValue)}
-                >
-                  <Picker.Item label="English" value="english" />
-                  <Picker.Item label="Hindi" value="hindi" />
-                  <Picker.Item label="French" value="french" />
-                 
-                </Picker>
-              </View> */}
-              <TextInput
-                style={styles.input}
-                placeholder="Bank Account"
-                value={bankAccount}
-                onChangeText={setBankAccount}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Card Details"
-                value={cardDetails}
-                onChangeText={setCardDetails}
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={styles.actionsContainer}>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutButtonText}>Logout</Text>
-              </TouchableOpacity>
-            </View>
+            {isEditing ? (
+              <View style={styles.userInfoContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Name"
+                  value={name}
+                  onChangeText={setName}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Contact Number"
+                  value={contactNumber}
+                  onChangeText={setContactNumber}
+                  keyboardType="phone-pad"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Bank Account"
+                  value={bankAccount}
+                  onChangeText={setBankAccount}
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Card Details"
+                  value={cardDetails}
+                  onChangeText={setCardDetails}
+                  keyboardType="numeric"
+                />
+                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.detailText}>Name: {name}</Text>
+                <Text style={styles.detailText}>Contact Number: {contactNumber}</Text>
+                <Text style={styles.detailText}>Email: {email}</Text>
+                <Text style={styles.detailText}>Bank Account: {bankAccount}</Text>
+                <Text style={styles.detailText}>Card Details: {cardDetails}</Text>
+                <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+                  <Text style={styles.editButtonText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <View style={styles.authContainer}>
@@ -106,7 +136,7 @@ const ProfilePage = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.authButton}
-              onPress={() => navigation.navigate("Signup")}
+              onPress={() => navigation.navigate("SignUp")}
             >
               <Text style={styles.authButtonText}>Signup</Text>
             </TouchableOpacity>
@@ -143,12 +173,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 20,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
   input: {
     width: "100%",
     paddingVertical: 15,
@@ -166,20 +190,15 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  pickerContainer: {
+  detailText: {
     width: "100%",
-    marginBottom: 15,
-  },
-  pickerLabel: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 5,
-  },
-  picker: {
-    width: "100%",
-    height: 50,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     backgroundColor: "#f8f8f8",
     borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    textAlign: 'left',
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -188,10 +207,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  actionsContainer: {
-    width: "100%",
-    alignItems: "center",
   },
   saveButton: {
     width: "100%",
@@ -211,6 +226,27 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   saveButtonText: {
+    fontSize: 18,
+    color: "white",
+  },
+  editButton: {
+    width: "100%",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: "#FF8C00",
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  editButtonText: {
     fontSize: 18,
     color: "white",
   },

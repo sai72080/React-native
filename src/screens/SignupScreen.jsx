@@ -4,24 +4,20 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
-  Platform,
-  Alert,
 } from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Fontisto from "react-native-vector-icons/Fontisto";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../context/AuthContext";
+import TextInputField from "../components/TextInputField";
+import GradientButton from "../components/GradientButton";
 
-const SignupScreen = ({ navigation }) => {
+const SignupScreen = ({ navigation, route }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const { login } = useAuth();
+  const { from } = route.params || {};
 
   const handleSignUp = () => {
     if (!username.trim() || !password.trim()) {
@@ -47,7 +43,11 @@ const SignupScreen = ({ navigation }) => {
     setConfirmPassword("");
     setError("");
 
-    navigation.navigate("Account");
+    if (from) {
+      navigation.navigate(from);
+    } else {
+      navigation.navigate("Account");
+    }
   };
 
   return (
@@ -66,80 +66,45 @@ const SignupScreen = ({ navigation }) => {
             }}
             style={styles.logo}
           />
-          <Text style={styles.helloText}>Hello</Text>
-          <Text style={styles.signInText}>Create a new account</Text>
+          <Text style={styles.helloText}>Welcome</Text>
+          <Text style={styles.signUpText}>Create your account</Text>
 
-          <View style={styles.inputContainer}>
-            <FontAwesome
-              name="user"
-              size={24}
-              color="#9A9A9A"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Username"
-              placeholderTextColor="#9A9A9A"
-              value={username}
-              onChangeText={(text) => setUsername(text)}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Fontisto
-              name="locked"
-              size={24}
-              color="#9A9A9A"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Password"
-              placeholderTextColor="#9A9A9A"
-              secureTextEntry={true}
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Fontisto
-              name="locked"
-              size={24}
-              color="#9A9A9A"
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Confirm Password"
-              placeholderTextColor="#9A9A9A"
-              secureTextEntry={true}
-              value={confirmPassword}
-              onChangeText={(text) => setConfirmPassword(text)}
-            />
-          </View>
+          <TextInputField
+            iconName="user"
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInputField
+            iconName="locked"
+            iconType="Fontisto"
+            placeholder="Password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TextInputField
+            iconName="locked"
+            iconType="Fontisto"
+            placeholder="Confirm Password"
+            secureTextEntry={true}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
 
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
           ) : null}
 
-          <TouchableOpacity style={styles.signInButton} onPress={handleSignUp}>
-            <LinearGradient
-              colors={["#F97794", "#623AA2"]}
-              style={styles.linearGradient}
-            >
-              <Text style={styles.signInButtonText}>Sign Up</Text>
-              <AntDesign name="arrowright" size={24} color="white" />
-            </LinearGradient>
-          </TouchableOpacity>
+          <GradientButton onPress={handleSignUp} text="Sign Up" iconName="arrowright" />
 
           <TouchableOpacity
-            style={styles.createAccountContainer}
-            onPress={() => navigation.navigate("Login")}
+            style={styles.signInContainer}
+            onPress={() => navigation.navigate("Login", { from })}
           >
-            <Text style={styles.createAccountText}>
+            <Text style={styles.signInText}>
               Already have an account?{" "}
-              <Text style={styles.createText}>Sign In</Text>
+              <Text style={styles.signInLink}>Sign In</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -182,66 +147,23 @@ const styles = StyleSheet.create({
     color: "#262626",
     marginBottom: 10,
   },
-  signInText: {
+  signUpText: {
     fontSize: 18,
     color: "#262626",
     marginBottom: 20,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    height: 50,
-    width: "100%",
-    paddingHorizontal: 15,
-    marginBottom: 15,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 18,
-    color: "#262626",
-    outline: "none", 
-    borderWidth: 0, 
-    appearance: "none", 
   },
   errorText: {
     color: "red",
     marginBottom: 10,
   },
-  signInButton: {
-    width: "100%",
-    height: 50,
-    borderRadius: 10,
-    marginBottom: 20,
+  signInContainer: {
+    marginTop: 20,
   },
-  linearGradient: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    flexDirection: "row",
-  },
-  signInButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  createAccountContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  createAccountText: {
+  signInText: {
     fontSize: 16,
     color: "#262626",
   },
-  createText: {
+  signInLink: {
     color: "#F97794",
     fontWeight: "bold",
   },

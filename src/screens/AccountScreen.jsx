@@ -82,7 +82,7 @@ const AccountScreen = ({ navigation }) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.authButton}
-                onPress={() => navigation.navigate("Signup")}
+                onPress={() => navigation.navigate("SignUp")}
               >
                 <Text style={styles.authButtonText}>Signup</Text>
               </TouchableOpacity>

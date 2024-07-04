@@ -21,7 +21,7 @@ const Cart = () => {
 
   const handleCheckout = (product) => {
     if (!user) {
-      navigation.navigate('Login');
+      navigation.navigate('Login', { from: 'Cart' });
     } else {
       navigation.navigate('Payment', { product });
     }

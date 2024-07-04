@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { useNavigation } from '@react-navigation/native'; 
 import { WishlistContext } from '../context/WishlistContext';
 import Header from '../components/Header';
 
 const WishlistPage = () => {
-  const navigation = useNavigation(); // Access navigation object
+  const navigation = useNavigation();
   const { wishlist, removeFromWishlist } = useContext(WishlistContext);
 
   const handleRemoveFromWishlist = (productId) => {
